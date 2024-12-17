@@ -10,3 +10,23 @@ services:
       - ./upload:/usr/src/app/uploads
     environment:
       NODE_ENV: production
+      DB_HOST: bayasho_db  # The name of your MySQL service
+      DB_PORT: 3306        # MySQL default port
+      DB_USER: root        # MySQL root user
+      DB_PASSWORD: password  # MySQL root password
+      DB_NAME: bayashop    # The database name to connect to
+
+  bayasho_db:
+    image: mysql:8.0
+    container_name: bayasho_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: bayashop
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_volume:/var/lib/mysql
+volumes:
+  mysql_data_volume:
