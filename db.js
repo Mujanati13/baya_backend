@@ -2,7 +2,7 @@ const mysql = require("mysql2");
 
 // Create a connection pool
 const pool = mysql.createPool({
-    host: "mysql",
+    host: "bayasho_db",
     user: "root",
     password: "password",
     database: "bayasho_db",
