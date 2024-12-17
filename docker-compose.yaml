@@ -1,61 +1,12 @@
-version: '3.9'
-
+version: '3'
 services:
-  node_app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: node_backend
-    command: npm start
-    volumes:
-      - ./src:/usr/src/app
-      - ./uploads:/usr/src/app/uploads
     ports:
       - "4004:4004"
-    depends_on:
-      - mysql
-    environment:
-      DATABASE_HOST: mysql
-      DATABASE_NAME: bayashop_db
-      DATABASE_USER: node_user
-      DATABASE_PASSWORD: node_password
-    networks:
-      - node_network
-
-  mysql:
-    image: mysql:8.0
-    container_name: node_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: bayashop_db
-      MYSQL_USER: node_user
-      MYSQL_PASSWORD: node_password
-      MYSQL_TCP_PORT: 3307
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "3307:3307"
-    networks:
-      - node_network
-
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: node_phpmyadmin
+      - ./upload:/usr/src/app/uploads
     environment:
-      PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: rootpassword
-    ports:
-      - "8081:80"
-    depends_on:
-      - mysql
-    networks:
-      - node_network
-
-volumes:
-  mysql_data:
-
-networks:
-  node_network:
-    driver: bridge
+      NODE_ENV: production

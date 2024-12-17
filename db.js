@@ -6,6 +6,7 @@ const db = mysql.createConnection({
     user: "node_user",
     password: "node_password",
     database: "bayashop_db",
+    port: 3307,
 });
 
 db.connect((err) => {
