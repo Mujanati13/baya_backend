@@ -3,9 +3,9 @@ const mysql = require("mysql2");
 // Database connection
 const db = mysql.createConnection({
     host: "mysql",
-    user: "node_user",
-    password: "node_password",
-    database: "bayashop_db",
+    user: "root",
+    password: "password",
+    database: "bayashop",
     port: 3307,
 });
 
