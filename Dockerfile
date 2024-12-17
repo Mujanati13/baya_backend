@@ -21,7 +21,7 @@ COPY . .
 
 # Ensure the upload directory exists
 # This directory will be overwritten by the volume at runtime
-RUN mkdir -p /usr/src/app/upload
+RUN mkdir -p /usr/src/app/uploads
 
 # Expose the port your app runs on
 EXPOSE 4004
