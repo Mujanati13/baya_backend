@@ -4,7 +4,7 @@ FROM node:19.5.0-alpine
 # Set the Node.js memory limit
 ENV NODE_OPTIONS=--max-old-space-size=1106
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
@@ -17,10 +17,14 @@ RUN npm install
 COPY . .
 
 # Build your application (if applicable)
-RUN npm run build
+# RUN npm run build
+
+# Ensure the upload directory exists
+# This directory will be overwritten by the volume at runtime
+RUN mkdir -p /usr/src/app/upload
 
 # Expose the port your app runs on
-EXPOSE 3002
+EXPOSE 4004
 
 # Start your application
 CMD ["npm", "start"]

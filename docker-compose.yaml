@@ -1,0 +1,13 @@
+version: '0'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4004:4004"
+    volumes:
+      - ./upload:/usr/src/app/bayashop/upload
+    environment:
+      NODE_ENV: production
