@@ -5,7 +5,7 @@ const pool = mysql.createPool({
     host: "bayasho_db",
     user: "root",
     password: "password",
-    database: "bayasho_db",
+    database: "bayashop",
     waitForConnections: true,
     connectionLimit: 10, // Adjust based on your app's needs
     queueLimit: 0,
