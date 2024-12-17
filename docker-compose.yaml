@@ -27,6 +27,22 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data_volume:/var/lib/mysql
+      - mysql_data_volume:/var/lib/mysql  # Persistent volume for MySQL data
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: bayasho_db  # Connects to MySQL service
+      MYSQL_ROOT_PASSWORD: password  # Use the root password from MySQL
+    ports:
+      - "8080:80"
+    volumes:
+      - phpmyadmin_data_volume:/var/lib/phpmyadmin
+
 volumes:
-  mysql_data_volume:
+  mysql_data_volume:  # Define the volume for MySQL data
+    driver: local
+
+  phpmyadmin_data_volume:  # Define the volume for phpMyAdmin data
+    driver: local
