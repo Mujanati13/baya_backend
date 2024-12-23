@@ -13,6 +13,8 @@ router.get('/promo-codes', async (req, res) => {
         DateDebut,
         DateFin,
         Active,
+        productScope,
+        categoryScope,
         COALESCE(
             (SELECT JSON_ARRAYAGG(ID_ART)
              FROM promo_product_mapping
@@ -61,7 +63,6 @@ router.post('/promo-codes', async (req, res) => {
   const connection = await db.promise().getConnection();
 
   try {
-    // Start a transaction
     await connection.beginTransaction();
 
     // Insert promo code
@@ -71,8 +72,8 @@ router.post('/promo-codes', async (req, res) => {
     );
     const promoCodeId = promoCodeResult.insertId;
 
-    // Handle product mapping
-    if (productScope === 'specific' && productIds.length) {
+    // Handle product mapping only if scope is 'specific'
+    if (productScope === 'specific' && productIds.length > 0) {
       const productMappings = productIds.map(productId =>
           [promoCodeId, productId]
       );
@@ -82,8 +83,8 @@ router.post('/promo-codes', async (req, res) => {
       );
     }
 
-    // Handle category mapping
-    if (categoryScope === 'specific' && categoryIds.length) {
+    // Handle category mapping only if scope is 'specific'
+    if (categoryScope === 'specific' && categoryIds.length > 0) {
       const categoryMappings = categoryIds.map(categoryId =>
           [promoCodeId, categoryId]
       );
@@ -93,7 +94,6 @@ router.post('/promo-codes', async (req, res) => {
       );
     }
 
-    // Commit transaction
     await connection.commit();
 
     res.status(201).json({
@@ -101,7 +101,6 @@ router.post('/promo-codes', async (req, res) => {
       ID_PROMO: promoCodeId
     });
   } catch (error) {
-    // Rollback transaction in case of error
     await connection.rollback();
     console.error('Error creating promo code:', error);
     res.status(500).json({ message: 'Erreur lors de la création du code promo' });
@@ -109,7 +108,6 @@ router.post('/promo-codes', async (req, res) => {
     connection.release();
   }
 });
-
 // UPDATE a promo code
 router.put('/promo-codes/:id', async (req, res) => {
   const promoCodeId = req.params.id;
