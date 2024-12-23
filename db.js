@@ -1,6 +1,6 @@
-const mysql = require("mysql2");
+const mysql = require('mysql2');
 
-// Create a connection pool
+Create a connection pool
 const pool = mysql.createPool({
     host: "bayasho_db",
     user: "root",
@@ -10,6 +10,16 @@ const pool = mysql.createPool({
     connectionLimit: 10, // Adjust based on your app's needs
     queueLimit: 0,
 });
+
+// const pool = mysql.createPool({
+//     host: "localhost",
+//     user: "root",
+//     password: "simo1234",
+//     database: "bayashop",
+//     waitForConnections: true,
+//     connectionLimit: 10, // Adjust based on your app's needs
+//     queueLimit: 0,
+// });
 
 // Handle connection errors
 pool.on('connection', (connection) => {

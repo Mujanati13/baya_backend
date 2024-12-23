@@ -6,17 +6,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4004:4004"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     volumes:
       - ./upload:/usr/src/app/uploads
     environment:
       NODE_ENV: production
-      DB_HOST: bayasho_db  # The name of your MySQL service
-      DB_PORT: 3306        # MySQL default port
-      DB_USER: root        # MySQL root user
-      DB_PASSWORD: password  # MySQL root password
-      DB_NAME: bayashop    # The database name to connect to
+      DB_HOST: bayasho_db  
+      DB_PORT: 3306        
+      DB_USER: root        
+      DB_PASSWORD: password  
+      DB_NAME: bayashop    
     networks:
-      - my-network  # Connect to the same network as bayasho_db
+      - my-network  
 
   bayasho_db:
     image: mysql:8.0
@@ -28,31 +36,47 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     volumes:
-      - mysql_data_volume:/var/lib/mysql  # Persistent volume for MySQL data
+      - mysql_data_volume:/var/lib/mysql  
     networks:
-      - my-network  # Connect to the same network as app
+      - my-network  
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     environment:
-      PMA_HOST: bayasho_db  # Connects to MySQL service
-      MYSQL_ROOT_PASSWORD: password  # Use the root password from MySQL
+      PMA_HOST: bayasho_db  
+      MYSQL_ROOT_PASSWORD: password 
     ports:
       - "8081:80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     volumes:
       - phpmyadmin_data_volume:/var/lib/phpmyadmin
     networks:
-      - my-network  # Connect to the same network as app
+      - my-network  
 
 volumes:
-  mysql_data_volume:  # Define the volume for MySQL data
+  mysql_data_volume: 
     driver: local
 
-  phpmyadmin_data_volume:  # Define the volume for phpMyAdmin data
+  phpmyadmin_data_volume: 
     driver: local
 
 networks:
-  my-network:  # Define the custom network
-    driver: bridge  # Bridge network for communication
+  my-network:  
+    driver: bridge  

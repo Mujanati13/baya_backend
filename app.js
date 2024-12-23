@@ -9,6 +9,8 @@ var usersRouter = require('./routes/users');
 const adminRoutes = require("./routes/admin");
 const categorieRoutes = require("./routes/categorie");
 const articleRoutes = require("./routes/articles");
+const PromoRoutes = require("./routes/promo");
+const CommandRoutes = require("./routes/command");
 
 var app = express();
 app.use(cors());
@@ -26,5 +28,7 @@ app.use('/users', usersRouter);
 app.use("/admin", adminRoutes);
 app.use("/categories", categorieRoutes);
 app.use("/articles", articleRoutes);
+app.use("/promo", PromoRoutes);
+app.use("/command", CommandRoutes);
 
 module.exports = app;
