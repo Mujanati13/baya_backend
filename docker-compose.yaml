@@ -6,14 +6,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4004:4004"
+
     volumes:
       - ./upload:/usr/src/app/uploads
     environment:
       NODE_ENV: production
       DB_HOST: bayasho_db
       DB_PORT: 3306
-      DB_USER: app_user
-      DB_PASSWORD: secure_password
+      DB_USER: root
+      DB_PASSWORD: password
       DB_NAME: bayashop
     networks:
       - my-network
@@ -22,36 +23,37 @@ services:
     image: mysql:8.0
     container_name: bayasho_db
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: bayashop
-      MYSQL_USER: app_user  # Non-root user
-      MYSQL_PASSWORD: secure_password  # User password
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
+#
     volumes:
       - mysql_data_volume:/var/lib/mysql
-      - ./db.sql:/docker-entrypoint-initdb.d/db.sql  # Initialize DB with SQL file
     networks:
       - my-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     environment:
       PMA_HOST: bayasho_db
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: password
     ports:
       - "8081:80"
+#
+    volumes:
+      - phpmyadmin_data_volume:/var/lib/phpmyadmin
     networks:
       - my-network
 
 volumes:
   mysql_data_volume:
+    driver: local
+
+  phpmyadmin_data_volume:
     driver: local
 
 networks:
