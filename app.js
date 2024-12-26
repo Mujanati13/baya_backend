@@ -11,7 +11,7 @@ const categorieRoutes = require("./routes/categorie");
 const articleRoutes = require("./routes/articles");
 const PromoRoutes = require("./routes/promo");
 const CommandRoutes = require("./routes/command");
-
+const DashboardRoutes = require("./routes/dashboard")
 var app = express();
 app.use(cors());
 
@@ -30,5 +30,6 @@ app.use("/categories", categorieRoutes);
 app.use("/articles", articleRoutes);
 app.use("/promo", PromoRoutes);
 app.use("/command", CommandRoutes);
+app.use("/dashboard", DashboardRoutes);
 
 module.exports = app;
