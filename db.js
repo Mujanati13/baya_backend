@@ -3,8 +3,8 @@ const mysql = require('mysql2');
 // Create a connection pool
 const pool = mysql.createPool({
     host: "bayasho_db",
-    user: "app_user",
-    password: "secure_password",
+    user: "root",
+    password: "password",
     database: "bayashop",
     waitForConnections: true,
     connectionLimit: 10, // Adjust based on your app's needs
