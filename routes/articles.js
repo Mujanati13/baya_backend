@@ -213,7 +213,7 @@ router.get("/check-quantity/:id/:requestedQuantity", (req, res) => {
 
   if (isNaN(requestedQuantity) || requestedQuantity < 0) {
     return res.status(400).json({
-      error: "Quantité demandée invalide"
+      error: "Quantité demandée invalide",
     });
   }
 
@@ -223,41 +223,39 @@ router.get("/check-quantity/:id/:requestedQuantity", (req, res) => {
     WHERE ID_ART = ?
   `;
 
-  return new Promise((resolve, reject) => {
-    db.query(sql, [req.params.id], (err, result) => {
-      if (err) {
-        console.error('Database error:', err);
-        return reject(res.status(500).json({
-          error: "Échec de la vérification du stock"
-        }));
-      }
+  db.query(sql, [req.params.id], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({
+        error: "Échec de la vérification du stock",
+      });
+    }
 
-      if (!result || result.length === 0) {
-        return reject(res.status(404).json({
-          error: "Produit non trouvé"
-        }));
-      }
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        error: "Produit non trouvé",
+      });
+    }
 
-      const { Quantite, Nom } = result[0];
-      let message;
-      let isAvailable = false;
+    const { Quantite, Nom } = result[0];
+    let message;
+    let isAvailable = false;
 
-      if (Quantite === 0) {
-        message = `Désolé, ${Nom} est en rupture de stock`;
-      } else if (Quantite < requestedQuantity) {
-        message = `Désolé, il ne reste que ${Quantite} ${Nom} en stock`;
-      } else {
-        message = `${Nom} est disponible en stock (${requestedQuantity} demandé, ${Quantite} disponible)`;
-        isAvailable = true;
-      }
+    if (Quantite === 0) {
+      message = `Désolé, ${Nom} est en rupture de stock`;
+    } else if (Quantite < requestedQuantity) {
+      message = `Désolé, il ne reste que ${Quantite} ${Nom} en stock`;
+    } else {
+      message = `${Nom} est disponible en stock (${requestedQuantity} demandé, ${Quantite} disponible)`;
+      isAvailable = true;
+    }
 
-      resolve(res.json({
-        success: true,
-        message,
-        requested: requestedQuantity,
-        available: Quantite,
-        isAvailable
-      }));
+    return res.json({
+      success: true,
+      message,
+      requested: requestedQuantity,
+      available: Quantite,
+      isAvailable,
     });
   });
 });
