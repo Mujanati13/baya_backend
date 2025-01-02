@@ -116,7 +116,7 @@ router.get(
       Quantite,
       Prix
     FROM Article
-    WHERE Quantite <= ?
+    WHERE Quantite <= AlertesMin
     ORDER BY Quantite ASC
   `;
 
@@ -199,14 +199,14 @@ router.get(
     }
 
     const sql = `
-    SELECT 
-      DATE_FORMAT(Date_cmd, ?) AS period,
+       SELECT 
+      DATE_FORMAT(Date_cmd, '%Y-%m-%d') AS period,
       COUNT(*) AS order_count,
       SUM(montant) AS total_sales
     FROM Commandes
     WHERE Date_cmd >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-    GROUP BY ${groupBy}
-    ORDER BY ${orderBy}
+    GROUP BY DATE_FORMAT(Date_cmd, '%Y-%m-%d')
+    ORDER BY period DESC
   `;
 
     return new Promise((resolve, reject) => {
@@ -315,22 +315,38 @@ router.get(
   "/sales-by-month",
   asyncHandler(async (req, res) => {
     const { year = new Date().getFullYear() } = req.query;
+    const { startDate, endDate } = req.query;
+
+    // Validate dates
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: "Both start_date and end_date are required",
+      });
+    }
+
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return res.status(400).json({
+        error: "Invalid date format. Use YYYY-MM-DD",
+      });
+    }
 
     const sql = `
-    SELECT 
-      MONTH(Date_cmd) as month,
-      YEAR(Date_cmd) as year,
-      COUNT(ID_CMD) as total_orders,
-      SUM(montant) as total_revenue,
-      GROUP_CONCAT(detail_cmd) as order_details
-    FROM Commandes
-    WHERE YEAR(Date_cmd) = ?
-    GROUP BY YEAR(Date_cmd), MONTH(Date_cmd)
-    ORDER BY YEAR(Date_cmd), MONTH(Date_cmd)
-  `;
+      SELECT 
+        MONTH(Date_cmd) as month,
+        YEAR(Date_cmd) as year,
+        COUNT(ID_CMD) as total_orders,
+        SUM(montant) as total_revenue,
+        GROUP_CONCAT(detail_cmd) as order_details
+      FROM Commandes
+      WHERE Date_cmd BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
+      GROUP BY YEAR(Date_cmd), MONTH(Date_cmd)
+      ORDER BY year, month`;
 
     return new Promise((resolve, reject) => {
-      db.query(sql, [year], (err, results) => {
+      db.query(sql, [startDateObj, endDateObj], (err, results) => {
         if (err) {
           console.error("Database error:", err);
           return reject(
@@ -482,9 +498,28 @@ router.get(
   })
 );
 
+
 router.get(
   "/sales-by-product",
   asyncHandler(async (req, res) => {
+    // Get start and end dates from query parameters
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+
+    // Validate date parameters
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: "Missing required parameters: startDate and endDate"
+      });
+    }
+
+    // Validate date format
+    if (!isValidDate(startDate) || !isValidDate(endDate)) {
+      return res.status(400).json({
+        error: "Invalid date format. Please use YYYY-MM-DD"
+      });
+    }
+
     const sql = `
     WITH RECURSIVE JsonItems AS (
         SELECT 
@@ -501,8 +536,8 @@ router.get(
             ) AS item
         WHERE 
             c.statut_CMD != 'cancelled'
-            AND MONTH(c.Date_cmd) = MONTH(CURRENT_DATE())
-            AND YEAR(c.Date_cmd) = YEAR(CURRENT_DATE())
+            AND c.Date_cmd >= ?
+            AND c.Date_cmd <= ?
     )
     SELECT 
         a.ID_ART,
@@ -522,7 +557,7 @@ router.get(
         total_revenue DESC`;
 
     return new Promise((resolve, reject) => {
-      db.query(sql, (err, results) => {
+      db.query(sql, [startDate, endDate], (err, results) => {
         if (err) {
           return reject(
             res.status(500).json({
@@ -544,10 +579,10 @@ router.get(
 
         resolve(
           res.json({
-            current_month: new Date().toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            }),
+            date_range: {
+              start: startDate,
+              end: endDate
+            },
             summary,
             products: results.map((p) => ({
               ...p,
@@ -562,6 +597,73 @@ router.get(
     });
   })
 );
+
+// Helper function to validate date format (YYYY-MM-DD)
+function isValidDate(dateString) {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateString)) return false;
+
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date);
+}
+
+// Visualize commands by date range
+router.get('/commands/visualization', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!isValidDate(startDate) || !isValidDate(endDate)) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    const sql = `
+  SELECT 
+    DATE(Date_cmd) as date,
+    COUNT(*) as total_orders,
+    COALESCE(SUM(montant), 0) as total_amount,
+    SUM(CASE WHEN statut_CMD = 'pending' THEN 1 ELSE 0 END) as pending_count,
+    SUM(CASE WHEN statut_CMD = 'completed' THEN 1 ELSE 0 END) as completed_count,
+    SUM(CASE WHEN statut_CMD = 'cancelled' THEN 1 ELSE 0 END) as cancelled_count
+  FROM Commandes
+  WHERE DATE(Date_cmd) BETWEEN ? AND ?
+  GROUP BY DATE(Date_cmd)
+  ORDER BY date ASC`;
+
+    db.query(sql, [startDate, endDate], (err, results) => {
+      if (err) {
+        return res.status(500).json({
+          error: "Failed to retrieve visualization data",
+          details: err.sqlMessage
+        });
+      }
+
+      const formattedData = results.reduce((acc, row) => {
+        acc[row.date] = {
+          totalOrders: row.total_orders,
+          totalAmount: row.total_amount,
+          status: {
+            pending: row.pending_count,
+            completed: row.completed_count,
+            cancelled: row.cancelled_count
+          }
+        };
+        return acc;
+      }, {});
+
+      res.json({
+        success: true,
+        data: formattedData
+      });
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 
 // Global error handler
 router.use((err, req, res, next) => {

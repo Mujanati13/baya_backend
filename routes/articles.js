@@ -80,7 +80,7 @@ router.post("/upload",
 
 // CRUD operations with improved error handling
 router.post("/", asyncHandler(async (req, res) => {
-  const { Nom, Description, Prix, Promotion, ancienPrix, photo, Quantite, Visible, ID_CAT } = req.body;
+  const { Nom, Description, Prix, Promotion, ancienPrix, photo, Quantite, Visible, ID_CAT , AlertesMin } = req.body;
   console.log("req.body", req.body);
   (req.body);
   if (!Nom || !Prix) {
@@ -88,13 +88,13 @@ router.post("/", asyncHandler(async (req, res) => {
   }
 
   const sql = `
-    INSERT INTO Article (Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT)
+    INSERT INTO Article (Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT , AlertesMin)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   return new Promise((resolve, reject) => {
     db.query(sql, 
-      [Nom, Description, Prix, Promotion, 0, photo, Quantite, Visible, ID_CAT], 
+      [Nom, Description, Prix, Promotion, 0, photo, Quantite, Visible, ID_CAT ,AlertesMin], 
       (err, result) => {
         if (err) {
           // Log the full error for server-side debugging
@@ -130,8 +130,8 @@ router.get("/", asyncHandler(async (req, res) => {
 }));
 
 router.put("/:id", asyncHandler(async (req, res) => {
-  let { Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT } = req.body; // Use let here
-  console.log(Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT);
+  let { Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT , AlertesMin } = req.body; // Use let here
+  console.log(Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT , AlertesMin);
 
   if (!req.params.id) {
     return res.status(400).json({ error: "Article ID is required" });
@@ -143,13 +143,13 @@ router.put("/:id", asyncHandler(async (req, res) => {
 
   const sql = `
     UPDATE Article
-    SET Nom = ?, Description = ?, Prix = ?, Promotion = ?, AncienPrix = ?, Photo = ?, Quantite = ?, Visible = ?, ID_CAT = ?
-    WHERE ID_ART = ?
+    SET Nom = ?, Description = ?, Prix = ?, Promotion = ?, AncienPrix = ?, Photo = ?, Quantite = ?, Visible = ?, ID_CAT = ? , AlertesMin = ?
+    WHERE ID_ART = ? 
   `;
 
   return new Promise((resolve, reject) => {
     db.query(sql, 
-      [Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT, req.params.id], 
+      [Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT, AlertesMin , req.params.id], 
       (err, result) => {
         if (err) {
           console.error('Database error:', err);

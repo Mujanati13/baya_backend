@@ -141,6 +141,48 @@ router.get("/sales-by-month", asyncHandler(async (req, res) => {
     });
 }));
 
+router.get("/commands-by-date", async (req, res) => {
+    try {
+      const { start_date, end_date } = req.query;
+  
+      // Validate dates
+      if (!start_date || !end_date) {
+        return res.status(400).json({
+          error: "Both start_date and end_date are required"
+        });
+      }
+  
+      const startDateObj = new Date(start_date);
+      const endDateObj = new Date(end_date);
+  
+      if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+        return res.status(400).json({
+          error: "Invalid date format. Use YYYY-MM-DD"
+        });
+      }
+  
+      const sql = `
+          SELECT 
+        c.*,
+        cl.NOM_CLT,
+        cl.PRENOM_CLT,
+        cl.TEL_CLT,
+        cl.EMAIL_CLT
+      FROM Commandes c
+      LEFT JOIN Clients cl ON c.id_clt = cl.ID_CLT
+      WHERE c.Date_cmd BETWEEN STR_TO_DATE(?, '%Y-%m-%d') AND STR_TO_DATE(?, '%Y-%m-%d')
+      ORDER BY c.Date_cmd DESC`;
+
+    const results = await query(sql, [start_date, end_date]);
+    res.json(results);
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 // Get sales by product
 
 
