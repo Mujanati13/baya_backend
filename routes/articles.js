@@ -89,7 +89,7 @@ router.post("/", asyncHandler(async (req, res) => {
 
   const sql = `
     INSERT INTO Article (Nom, Description, Prix, Promotion, AncienPrix, Photo, Quantite, Visible, ID_CAT , AlertesMin)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   return new Promise((resolve, reject) => {
