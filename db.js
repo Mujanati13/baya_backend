@@ -1,25 +1,25 @@
 const mysql = require("mysql2");
 
-// // Create a connection pool
-// const pool = mysql.createPool({
-//   host: "84.247.166.36",
-//   user: "root",
-//   password: "simo1234",
-//   database: "bayashop",
-//   waitForConnections: true,
-//   connectionLimit: 10,
-//   queueLimit: 0,
-// });
-
+// Create a connection pool
 const pool = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "simo1234",
-    database: "bayashop",
-    waitForConnections: true,
-    connectionLimit: 10, // Adjust based on your app's needs
-    queueLimit: 0,
+  host: "84.247.166.36",
+  user: "root",
+  password: "simo1234",
+  database: "bayashop",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
+
+// const pool = mysql.createPool({
+//     host: "localhost",
+//     user: "root",
+//     password: "simo1234",
+//     database: "bayashop",
+//     waitForConnections: true,
+//     connectionLimit: 10, // Adjust based on your app's needs
+//     queueLimit: 0,
+// });
 
 // Handle connection errors
 pool.on("connection", (connection) => {

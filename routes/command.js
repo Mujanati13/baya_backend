@@ -52,7 +52,7 @@ router.post("/", (req, res) => {
 
 // GET route
 router.get("/", (req, res) => {
-    db.query("SELECT * FROM commandes ORDER BY Date_cmd DESC", (error, rows) => {
+    db.query("SELECT * FROM Commandes ORDER BY Date_cmd DESC", (error, rows) => {
         if (error) {
             console.error("Error fetching commandes:", error);
             return res.status(500).json({ error: "Internal server error" });
